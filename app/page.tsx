@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 overflow-hidden">
+    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 overflow-hidden">
       <div className="relative z-10 mx-auto max-w-4xl text-center">
         <div className="mb-6 inline-flex animate-fade-in items-center rounded-full bg-sage-50 px-3 py-1 text-sm font-medium text-sage-600 ring-1 ring-inset ring-sage-500/20">
           <span className="flex h-2 w-2 mr-2 rounded-full bg-sage-500"></span>
