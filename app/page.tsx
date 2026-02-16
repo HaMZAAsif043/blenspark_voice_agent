@@ -1,65 +1,41 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 overflow-hidden">
+      <div className="relative z-10 mx-auto max-w-4xl text-center">
+        <div className="mb-6 inline-flex animate-fade-in items-center rounded-full bg-sage-50 px-3 py-1 text-sm font-medium text-sage-600 ring-1 ring-inset ring-sage-500/20">
+          <span className="flex h-2 w-2 mr-2 rounded-full bg-sage-500"></span>
+          Revolutionizing Voice Interactions
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <h1 className="text-5xl font-bold tracking-tight text-accent sm:text-7xl">
+          Meet <span className="text-sage-500">Blen</span>Spark, your Intelligent Assistant.
+        </h1>
+
+        <p className="mt-8 text-lg leading-8 text-sage-600 sm:text-xl">
+          An ElevenLabs-powered voice agent that handles orders, management, and more with human-like precision. Experience the BlenSpark advantage.
+        </p>
+
+        <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
+          <Link
+            href="/agent"
+            className="sage-gradient flex h-14 w-full items-center justify-center rounded-2xl px-10 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-sage-200 sm:w-auto"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Start Talking
+          </Link>
+          <Link
+            href="/dashboard"
+            className="glass flex h-14 w-full items-center justify-center rounded-2xl px-10 text-lg font-semibold text-sage-700 transition-all hover:bg-white sm:w-auto"
           >
-            Documentation
-          </a>
+            Open Dashboard
+          </Link>
         </div>
-      </main>
+      </div>
+
+      {/* Decorative Blur Spheres */}
+      <div className="absolute top-1/4 -left-20 h-96 w-96 rounded-full bg-sage-200/30 blur-[120px]"></div>
+      <div className="absolute bottom-0 -right-20 h-96 w-96 rounded-full bg-accent/20 blur-[120px]"></div>
     </div>
   );
 }
