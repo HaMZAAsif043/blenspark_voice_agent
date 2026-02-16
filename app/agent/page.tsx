@@ -1,7 +1,7 @@
 import AgentCard from "@/components/Agent/AgentCard";
 
 export default function AgentPage() {
-    const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "";
+    // const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "";
 
     return (
         <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6 py-12">
@@ -23,14 +23,7 @@ export default function AgentPage() {
                         </p>
                     </div>
 
-                    <AgentCard agentId={agentId} />
-
-                    {!agentId && (
-                        <div className="mt-8 rounded-xl bg-amber-50 p-4 text-sm text-amber-700 border border-amber-200">
-                            <p className="font-semibold text-amber-800">Agent ID Missing</p>
-                            <p>Please provide your ElevenLabs Agent ID in the <code>.env.local</code> file as <code>NEXT_PUBLIC_ELEVENLABS_AGENT_ID</code>.</p>
-                        </div>
-                    )}
+                    <AgentCard />
                 </div>
             </div>
         </div>

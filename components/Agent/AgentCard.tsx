@@ -4,11 +4,11 @@ import { useConversation } from "@elevenlabs/react";
 import { useCallback, useState } from "react";
 import VoiceVisualizer from "./VoiceVisualizer";
 
-interface AgentCardProps {
-    agentId: string;
-}
+// interface AgentCardProps {
+//     agentId: string;
+// }
 
-export default function AgentCard({ agentId }: AgentCardProps) {
+export default function AgentCard() {
     const [isConnecting, setIsConnecting] = useState(false);
 
     const conversation = useConversation({
@@ -35,19 +35,35 @@ export default function AgentCard({ agentId }: AgentCardProps) {
             try {
                 // Request microphone access
                 await navigator.mediaDevices.getUserMedia({ audio: true });
-                console.log(agentId)
-                await startSession({
-                    agentId: agentId,
-                    connectionType: "webrtc",
+
+                // Fetch signed URL from Django backend
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/voice-ai/signed-url/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_context: {
+                            customer_name: "BlenSpark User"
+                        }
+                    })
                 });
-                console.log(agentId)
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || "Failed to get signed URL");
+                }
+
+                await startSession({
+                    signedUrl: result.data.signed_url,
+                });
 
             } catch (error) {
                 console.error("Failed to start session:", error);
                 setIsConnecting(false);
             }
         }
-    }, [status, agentId, startSession, endSession]);
+    }, [status, startSession, endSession]);
 
     const isConnected = status === "connected";
 
