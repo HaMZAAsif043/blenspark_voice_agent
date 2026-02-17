@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/";
 
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -19,6 +19,9 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 export const api = {
     getOrders: () => fetchWithAuth("/orders/"),
     getMenu: () => fetchWithAuth("/menu/"),
+  getStats: () => fetchWithAuth('/order_stats/'),
+  getRevenueStats: () => fetchWithAuth('/Revenue_Performance/'),
+  getSalesDistribution: () => fetchWithAuth('/Sales_Distribution/'),
     createMenuItem: (data: { name: string; cost: number; id?: string }) =>
         fetchWithAuth("/menu/", {
             method: "POST",

@@ -64,7 +64,7 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
     return (
         <button
             onClick={onClick}
-            className={`px-6 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl ${active
+            className={`px-6 py-2.5 text-sm font-bold transition-all cursor-pointer duration-300 rounded-xl ${active
                 ? "bg-white text-sage-900 shadow-sm"
                 : "text-sage-500 hover:text-sage-700"
                 }`}

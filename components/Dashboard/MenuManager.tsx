@@ -21,7 +21,7 @@ export default function MenuManager() {
     const loadMenu = async () => {
         try {
             const data = await api.getMenu();
-            setMenu(data);
+            setMenu(data.menu);
         } catch (error) {
             console.error("Failed to load menu:", error);
             // Fallback
@@ -70,7 +70,7 @@ export default function MenuManager() {
                         <div className="flex gap-4">
                             <input
                                 type="number"
-                                placeholder="Cost ($)"
+                                placeholder="Cost (RS)"
                                 value={newItem.cost}
                                 onChange={(e) => setNewItem({ ...newItem, cost: e.target.value })}
                                 className="flex-1 rounded-xl border-sage-100 bg-white/50 px-4 py-3 text-sm outline-none ring-1 ring-sage-100 transition-all focus:ring-2 focus:ring-sage-300"
@@ -98,7 +98,7 @@ export default function MenuManager() {
                                     <p className="text-xs uppercase tracking-widest text-sage-400 font-bold mt-1">Ref: {item.id}</p>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <p className="text-2xl font-black text-sage-600">${item.cost.toFixed(2)}</p>
+                                    <p className="text-2xl font-black text-sage-600">PKR {item.cost}</p>
                                     <div className="h-1 w-8 bg-sage-200 mt-2 transition-all group-hover:w-12 group-hover:bg-accent" />
                                 </div>
                             </div>

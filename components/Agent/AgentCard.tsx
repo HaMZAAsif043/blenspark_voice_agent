@@ -37,7 +37,7 @@ export default function AgentCard() {
                 await navigator.mediaDevices.getUserMedia({ audio: true });
 
                 // Fetch signed URL from Django backend
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/voice-ai/signed-url/`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/voice-ai/signed-url/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
