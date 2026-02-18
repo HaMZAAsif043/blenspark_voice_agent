@@ -2,6 +2,7 @@ export interface OrderItem {
     name: string;
     qty: number;
     price: number;
+    cost?: number;
 }
 
 export interface Order {
