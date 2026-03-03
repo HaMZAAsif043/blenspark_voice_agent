@@ -21,24 +21,30 @@ export default function OrdersTable() {
         setSelectedOrder(null);
     };
 
-    useEffect(() => {
-        const loadOrders = async () => {
-            try {
-                const data = await api.getOrders();
-                setOrders(data.orders);
-            } catch (error) {
-                console.error("Failed to load orders:", error);
-                // // Fallback for demonstration
-                // setOrders([
-                //     { id: "1", customer_name: "John Doe", items: "Espresso, Croissant", total_price: 12.5, status: "Pending", created_at: new Date().toISOString() },
-                //     { id: "2", customer_name: "Jane Smith", items: "Latte, Avocado Toast", total_price: 18.0, status: "Completed", created_at: new Date().toISOString() },
-                // ]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        loadOrders();
-    }, []);
+  useEffect(() => {
+    const loadOrders = async () => {
+        try {
+            const data = await api.getOrders();
+
+            // Randomize status for demonstration
+            const statuses = ["Pending", "Completed", "Cancelled", "Processing"];
+        const ordersWithRandomStatus: Order[] = data.orders.map((order: Order): Order => ({
+            ...order,
+            status: statuses[Math.floor(Math.random() * statuses.length)] as Order['status'],
+        })).reverse();
+
+setOrders(ordersWithRandomStatus);
+
+        } catch (error) {
+            console.error("Failed to load orders:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    loadOrders();
+}, []);
+
 
     if (isLoading) {
         return (
@@ -71,7 +77,7 @@ export default function OrdersTable() {
                                 <td className="px-6 py-4 text-center text-sm font-medium text-sage-500">{index + 1}</td>
                                 <td className="px-6 py-4 font-medium text-sage-900 truncate">{order.customer_name}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${order.status === "Completed" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${order.status === "Completed" ? "bg-green-100 text-green-600" : order.status === "Cancelled"?"bg-red-100 text-red-600" :"bg-amber-100 text-amber-600"
                                         }`}>
                                         {order.status || "Pending"}
                                     </span>

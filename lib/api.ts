@@ -13,6 +13,11 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
         throw new Error(`API Error: ${response.statusText}`);
     }
 
+    // 204 No Content — nothing to parse
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
+        return undefined;
+    }
+
     return response.json();
 }
 
@@ -26,5 +31,26 @@ export const api = {
         fetchWithAuth("/menu/", {
             method: "POST",
             body: JSON.stringify(data),
+        }),
+
+    // ── Appointment Schedules ────────────────────────────────────────────────
+    getSchedules: () =>
+        fetchWithAuth("/appointment/schedule/"),
+
+    createSchedule: (data: import("@/types/schedule").SchedulePayload) =>
+        fetchWithAuth("/appointment/schedule/", {
+            method: "POST",
+            body: JSON.stringify(data),
+        }),
+
+    updateSchedule: (id: number, data: import("@/types/schedule").SchedulePayload) =>
+        fetchWithAuth(`/appointment/schedule/${id}/`, {
+            method: "PATCH",
+            body: JSON.stringify(data),
+        }),
+
+    deleteSchedule: (id: number) =>
+        fetchWithAuth(`/appointment/schedule/${id}/`, {
+            method: "DELETE",
         }),
 };

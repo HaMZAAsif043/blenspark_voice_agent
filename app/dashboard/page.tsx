@@ -4,8 +4,9 @@ import { useState } from "react";
 import OrdersTable from "@/components/Dashboard/OrdersTable";
 import MenuManager from "@/components/Dashboard/MenuManager";
 import DashboardAnalytics from "@/components/Dashboard/DashboardAnalytics";
+import ScheduleManager from "@/components/Dashboard/ScheduleManager";
 
-type TabType = "analytics" | "menu" | "orders";
+type TabType = "analytics" | "menu" | "orders" | "schedule";
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<TabType>("analytics");
@@ -34,6 +35,11 @@ export default function DashboardPage() {
                         onClick={() => setActiveTab("orders")}
                         label="Orders"
                     />
+                    <TabButton
+                        active={activeTab === "schedule"}
+                        onClick={() => setActiveTab("schedule")}
+                        label="Schedule"
+                    />
                 </div>
             </div>
 
@@ -53,6 +59,12 @@ export default function DashboardPage() {
                 {activeTab === "orders" && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <OrdersTable />
+                    </div>
+                )}
+
+                {activeTab === "schedule" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <ScheduleManager />
                     </div>
                 )}
             </div>

@@ -14,7 +14,7 @@ export default function Home() {
         </h1>
 
         <p className="mt-8 text-lg leading-8 text-sage-600 sm:text-xl">
-          An ElevenLabs-powered voice agent that handles orders, management, and more with human-like precision. Experience the BlenSpark advantage.
+          An AI-powered voice agent that handles orders, management, and more with human-like precision. Experience the BlenSpark advantage.
         </p>
 
         <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">

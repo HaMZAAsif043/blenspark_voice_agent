@@ -19,7 +19,7 @@ export default function AgentPage() {
                             Talk to BlenSpark
                         </h1>
                         <p className="mt-4 text-lg text-sage-600">
-                            The intelligent voice assistant powered by BlenSpark & ElevenLabs.
+                            The intelligent voice assistant powered by BlenSpark.
                         </p>
                     </div>
 
