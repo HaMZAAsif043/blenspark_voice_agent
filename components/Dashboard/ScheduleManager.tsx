@@ -32,8 +32,9 @@ export default function ScheduleManager() {
         setLoading(true);
         try {
             const raw = await api.getSchedules();
+            console.log(raw)
             // DRF may return { results: [...] } (paginated) or a plain array
-            const data: Schedule[] = Array.isArray(raw) ? raw : (raw?.results ?? []);
+            const data: Schedule[] = Array.isArray(raw) ? raw : (raw?.data ?? []);
             setRows((prev) =>
                 prev.map((row) => {
                     const saved = data.find((s) => s.day_of_week === row.day_of_week);
@@ -51,7 +52,6 @@ export default function ScheduleManager() {
         loadSchedules();
     }, [loadSchedules]);
 
-    // ── Field change ──────────────────────────────────────────────────────────
     const handleChange = (day: number, field: keyof Schedule, value: string | number | boolean) => {
         setRows((prev) =>
             prev.map((r) => (r.day_of_week === day ? { ...r, [field]: value } : r))
@@ -134,7 +134,7 @@ export default function ScheduleManager() {
                 <button
                     onClick={saveAll}
                     disabled={globalSaving}
-                    className="mt-3 sm:mt-0 inline-flex items-center gap-2 rounded-xl sage-gradient px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90 active:scale-95 transition-all duration-200 disabled:opacity-60"
+                    className="mt-3 cursor-pointer sm:mt-0 inline-flex items-center gap-2 rounded-xl sage-gradient px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90 active:scale-95 transition-all duration-200 disabled:opacity-60"
                 >
                     {globalSaving ? (
                         <>
@@ -211,7 +211,7 @@ export default function ScheduleManager() {
                                 {/* ── Active toggle ──────────────────────── */}
                                 <button
                                     onClick={() => handleChange(day.value, "is_active", !row.is_active)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                                    className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
                                         row.is_active ? "bg-sage-500" : "bg-sage-200"
                                     }`}
                                     title={row.is_active ? "Deactivate" : "Activate"}

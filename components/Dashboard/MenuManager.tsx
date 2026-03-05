@@ -78,7 +78,7 @@ export default function MenuManager() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="sage-gradient rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
+                                className="sage-gradient cursor-pointer rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
                             >
                                 {isSubmitting ? "..." : "Add Item"}
                             </button>

@@ -33,6 +33,13 @@ export const api = {
             body: JSON.stringify(data),
         }),
 
+    // ── Calls ─────────────────────────────────────────────────────────────────
+    getCalls: () => fetchWithAuth("/calls/"),
+    getCallStatus: (conversationId: string) => fetchWithAuth(`/calls/status/${conversationId}/`),
+
+    // ── Appointments ─────────────────────────────────────────────────────────
+    getAppointments: () => fetchWithAuth("/appointment/all/"),
+
     // ── Appointment Schedules ────────────────────────────────────────────────
     getSchedules: () =>
         fetchWithAuth("/appointment/schedule/"),
@@ -44,7 +51,7 @@ export const api = {
         }),
 
     updateSchedule: (id: number, data: import("@/types/schedule").SchedulePayload) =>
-        fetchWithAuth(`/appointment/schedule/${id}/`, {
+        fetchWithAuth(`/appointment/schedule/`, {
             method: "PATCH",
             body: JSON.stringify(data),
         }),

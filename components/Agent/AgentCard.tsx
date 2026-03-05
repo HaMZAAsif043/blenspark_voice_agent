@@ -90,7 +90,7 @@ export default function AgentCard() {
                 <button
                     onClick={handleToggleConversation}
                     disabled={isConnecting}
-                    className={`flex h-14 w-full items-center justify-center rounded-2xl font-semibold transition-all duration-300 ${isConnected
+                    className={`flex h-14 w-full cursor-pointer items-center justify-center rounded-2xl font-semibold transition-all duration-300 ${isConnected
                         ? "bg-red-50 text-red-600 hover:bg-red-100"
                         : "sage-gradient text-white shadow-lg hover:shadow-sage-200"
                         } disabled:opacity-50`}
