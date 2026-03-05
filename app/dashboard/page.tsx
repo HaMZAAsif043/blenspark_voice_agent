@@ -4,8 +4,11 @@ import { useState } from "react";
 import OrdersTable from "@/components/Dashboard/OrdersTable";
 import MenuManager from "@/components/Dashboard/MenuManager";
 import DashboardAnalytics from "@/components/Dashboard/DashboardAnalytics";
+import ScheduleManager from "@/components/Dashboard/ScheduleManager";
+import AppointmentsTable from "@/components/Dashboard/AppointmentsTable";
+import CallsTable from "@/components/Dashboard/CallsTable";
 
-type TabType = "analytics" | "menu" | "orders";
+type TabType = "analytics" | "menu" | "orders" | "schedule" | "appointments" | "calls";
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<TabType>("analytics");
@@ -34,6 +37,21 @@ export default function DashboardPage() {
                         onClick={() => setActiveTab("orders")}
                         label="Orders"
                     />
+                    <TabButton
+                        active={activeTab === "schedule"}
+                        onClick={() => setActiveTab("schedule")}
+                        label="Schedule"
+                    />
+                    <TabButton
+                        active={activeTab === "appointments"}
+                        onClick={() => setActiveTab("appointments")}
+                        label="Appointments"
+                    />
+                    <TabButton
+                        active={activeTab === "calls"}
+                        onClick={() => setActiveTab("calls")}
+                        label="Calls"
+                    />
                 </div>
             </div>
 
@@ -55,6 +73,24 @@ export default function DashboardPage() {
                         <OrdersTable />
                     </div>
                 )}
+
+                {activeTab === "schedule" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <ScheduleManager />
+                    </div>
+                )}
+
+                {activeTab === "appointments" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <AppointmentsTable />
+                    </div>
+                )}
+
+                {activeTab === "calls" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <CallsTable />
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -64,7 +100,7 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
     return (
         <button
             onClick={onClick}
-            className={`px-6 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl ${active
+            className={`px-6 py-2.5 text-sm cursor-pointer font-bold transition-all cursor-pointer duration-300 rounded-xl ${active
                 ? "bg-white text-sage-900 shadow-sm"
                 : "text-sage-500 hover:text-sage-700"
                 }`}
