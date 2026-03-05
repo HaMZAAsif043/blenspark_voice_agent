@@ -1,37 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blenspark Voice Agent
 
-## Getting Started
+A full-stack **AI Voice Agent** platform built with **Next.js** (frontend) and **Django** (backend). Features a real-time voice agent testing interface, business analytics dashboard, orders management, and dynamic menu configuration — designed for restaurant and retail automation.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 🎙️ Voice Agent
+- **Live Testing Page** — Test the AI voice agent in real-time directly from the browser
+- **Conversation Playback** — Review voice agent interactions and responses
+- **Agent Configuration** — Tune agent behavior, prompts, and response flow
+
+### 📊 Dashboard & Analytics
+- **Business Overview** — Key metrics and KPIs at a glance
+- **Conversation Analytics** — Call volume, success rate, drop-off tracking
+- **Performance Charts** — Visual trends over time (daily/weekly/monthly)
+
+### 🛒 Orders Management
+- **Orders Table** — Full CRUD operations on incoming orders
+- **Status Tracking** — Real-time order status updates (pending, confirmed, completed)
+- **Filtering & Search** — Sort and filter orders by date, status, and customer
+
+### 🍽️ Menu Management
+- **Dynamic Menu Builder** — Add, edit, and remove menu items
+- **Category Management** — Organize items by category
+- **Live Sync** — Changes reflect immediately in the voice agent responses via Django API
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 14, TypeScript, Tailwind CSS |
+| Backend | Django, Django REST Framework |
+| Auth | JWT Authentication |
+| State Management | React Context / Zustand |
+| Charts | Recharts / Chart.js |
+| API | RESTful API (Django backend) |
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────┐
+│        Next.js Frontend         │
+│  Voice Test │ Dashboard │ Menu  │
+└──────────────┬──────────────────┘
+               │ REST API (JWT)
+┌──────────────▼──────────────────┐
+│         Django Backend          │
+│  Voice Agent │ Orders │ Menu    │
+└─────────────────────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Frontend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+git clone https://github.com/HaMZAAsif043/blenspark_voice_agent.git
+cd blenspark_voice_agent
 
-## Learn More
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Backend (Django)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Environment Variables
 
-## Deploy on Vercel
+Create a `.env.local` in the root:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_VOICE_AGENT_URL=your_voice_agent_endpoint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# blenspark_voice_agent
+## 📁 Project Structure
+
+```
+blenspark_voice_agent/
+├── app/
+│   ├── dashboard/        # Analytics & overview
+│   ├── voice-test/       # Live voice agent testing
+│   ├── orders/           # Orders table & management
+│   └── menu/             # Menu management UI
+├── components/
+│   ├── charts/           # Analytics charts
+│   ├── tables/           # Orders & menu tables
+│   └── voice/            # Voice agent interface
+├── lib/
+│   └── api/              # Django API integration
+└── types/                # TypeScript definitions
+```
+
+## 📸 Pages Overview
+
+| Page | Description |
+|------|-------------|
+| `/dashboard` | Analytics, KPIs, conversation stats |
+| `/voice-test` | Live voice agent interaction testing |
+| `/orders` | Orders table with status management |
+| `/menu` | Menu items and category management |
+
+---
+
+Built at [BlenSpark](https://blenspark.com) — AI-powered business automation
