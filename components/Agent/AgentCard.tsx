@@ -1,7 +1,7 @@
 "use client";
 
-import { useConversation } from "@elevenlabs/react";
-import { useCallback, useState } from "react";
+// import { useConversation } from "@elevenlabs/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import VoiceVisualizer from "./VoiceVisualizer";
 
 // interface AgentCardProps {
@@ -10,62 +10,283 @@ import VoiceVisualizer from "./VoiceVisualizer";
 
 export default function AgentCard() {
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const wsRef = useRef<WebSocket | null>(null);
+    const mediaStreamRef = useRef<MediaStream | null>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+    const processorRef = useRef<ScriptProcessorNode | null>(null);
+    const frequencyDataRef = useRef<Uint8Array>(new Uint8Array(0));
+    const sessionReadyRef = useRef(false);
+    const sendEveryMsRef = useRef(60);
+    const nextSendAtRef = useRef(0);
+    const nextPlayTimeRef = useRef(0);
+    const activePlaybackCountRef = useRef(0);
+    // Serialize audio chunk scheduling: each incoming chunk is chained onto
+    // this promise so chunks are decoded and scheduled in arrival order even
+    // if decodeAudioData() calls resolve out of order.
+    const audioQueueRef = useRef<Promise<void>>(Promise.resolve());
 
-    const conversation = useConversation({
-        onConnect: () => {
-            console.log("Connected to ElevenLabs");
-            setIsConnecting(false);
-        },
-        onDisconnect: () => {
-            console.log("Disconnected from ElevenLabs");
-        },
-        onError: (error) => {
-            console.error("ElevenLabs Error:", error);
-            setIsConnecting(false);
-        },
-    });
+    // /* ElevenLabs Code - Commented Out
+    // const conversation = useConversation({
+    //     onConnect: () => {
+    //         console.log("Connected to ElevenLabs");
+    //         setIsConnecting(false);
+    //     },
+    //     onDisconnect: () => {
+    //         console.log("Disconnected from ElevenLabs");
+    //     },
+    //     onError: (error) => {
+    //         console.error("ElevenLabs Error:", error);
+    //         setIsConnecting(false);
+    //     },
+    // });
 
-    const { status, isSpeaking, startSession, endSession, getOutputByteFrequencyData } = conversation;
+    // const { status, isSpeaking, startSession, endSession, getOutputByteFrequencyData } = conversation;
+    // */
+
+    const getOutputByteFrequencyData = () => frequencyDataRef.current;
+
+    const cleanupConnection = useCallback(async () => {
+        sessionReadyRef.current = false;
+
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+
+        if (processorRef.current) {
+            processorRef.current.disconnect();
+            processorRef.current.onaudioprocess = null;
+            processorRef.current = null;
+        }
+
+        if (sourceNodeRef.current) {
+            sourceNodeRef.current.disconnect();
+            sourceNodeRef.current = null;
+        }
+
+        if (mediaStreamRef.current) {
+            mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+            mediaStreamRef.current = null;
+        }
+
+        if (audioContextRef.current) {
+            await audioContextRef.current.close();
+            audioContextRef.current = null;
+        }
+
+        nextPlayTimeRef.current = 0;
+        activePlaybackCountRef.current = 0;
+        audioQueueRef.current = Promise.resolve();
+        frequencyDataRef.current = new Uint8Array(0);
+
+        setIsSpeaking(false);
+        setIsConnected(false);
+        setIsConnecting(false);
+    }, []);
+
+    const scheduleAudioChunk = useCallback(async (chunk: ArrayBuffer) => {
+        const audioContext = audioContextRef.current;
+        if (!audioContext) {
+            return;
+        }
+
+        try {
+            let audioBuffer: AudioBuffer;
+
+            // Check if this is WAV-wrapped (starts with RIFF header)
+            const isWav = chunk.byteLength > 4 &&
+                new Uint8Array(chunk, 0, 4).every((v, i) => "RIFF".charCodeAt(i) === v);
+
+            if (isWav) {
+                // Use decodeAudioData for WAV files
+                audioBuffer = await audioContext.decodeAudioData(chunk.slice(0));
+            } else {
+                // Handle raw 16-bit PCM data (16 kHz, mono)
+                const pcmData = new Int16Array(chunk);
+                const samples = pcmData.length;
+                
+                audioBuffer = audioContext.createBuffer(1, samples, 16000);
+
+                const channelData = audioBuffer.getChannelData(0);
+                for (let i = 0; i < samples; i++) {
+                    channelData[i] = pcmData[i] / 32768.0; // Convert to [-1, 1] range
+                }
+            }
+
+            const playbackNode = audioContext.createBufferSource();
+            playbackNode.buffer = audioBuffer;
+            playbackNode.connect(audioContext.destination);
+
+            const now = audioContext.currentTime;
+            if (nextPlayTimeRef.current < now) {
+                nextPlayTimeRef.current = now;
+            }
+
+            const startAt = nextPlayTimeRef.current;
+            playbackNode.start(startAt);
+            nextPlayTimeRef.current = startAt + audioBuffer.duration;
+
+            activePlaybackCountRef.current += 1;
+            setIsSpeaking(true);
+
+            playbackNode.onended = () => {
+                activePlaybackCountRef.current = Math.max(0, activePlaybackCountRef.current - 1);
+                if (activePlaybackCountRef.current === 0) {
+                    setIsSpeaking(false);
+                }
+            };
+        } catch (error) {
+            console.error("Failed to decode/play audio chunk:", error);
+            if (activePlaybackCountRef.current === 0) {
+                setIsSpeaking(false);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            void cleanupConnection();
+        };
+    }, [cleanupConnection]);
 
     const handleToggleConversation = useCallback(async () => {
-        if (status === "connected") {
-            await endSession();
+        if (isConnected) {
+            await cleanupConnection();
         } else {
             setIsConnecting(true);
             try {
-                // Request microphone access
-                await navigator.mediaDevices.getUserMedia({ audio: true });
+                sessionReadyRef.current = false;
+                nextSendAtRef.current = 0;
+                nextPlayTimeRef.current = 0;
+                activePlaybackCountRef.current = 0;
 
-                // Fetch signed URL from Django backend
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/voice-ai/signed-url/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_context: {
-                            customer_name: "BlenSpark User"
-                        }
-                    })
-                });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaStreamRef.current = stream;
 
-                const result = await response.json();
-                if (!result.success) {
-                    throw new Error(result.message || "Failed to get signed URL");
+                const AudioContextCtor =
+                    window.AudioContext ||
+                    (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+                if (!AudioContextCtor) {
+                    throw new Error("AudioContext is not supported in this browser.");
                 }
 
-                await startSession({
-                    signedUrl: result.data.signed_url,
-                });
+                let audioContext: AudioContext;
+                try {
+                    audioContext = new AudioContextCtor({ sampleRate: 16000 });
+                } catch {
+                    audioContext = new AudioContextCtor();
+                }
 
+                audioContextRef.current = audioContext;
+                const source = audioContext.createMediaStreamSource(stream);
+                sourceNodeRef.current = source;
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                processorRef.current = processor;
+
+                processor.onaudioprocess = (event: AudioProcessingEvent) => {
+                    const inputData = event.inputBuffer.getChannelData(0);
+
+                    frequencyDataRef.current = new Uint8Array(inputData.length);
+                    for (let i = 0; i < inputData.length; i++) {
+                        frequencyDataRef.current[i] = Math.max(0, Math.min(255, (inputData[i] + 1) * 127));
+                    }
+
+                    const ws = wsRef.current;
+                    const canSendNow =
+                        !!ws &&
+                        ws.readyState === WebSocket.OPEN &&
+                        sessionReadyRef.current &&
+                        performance.now() >= nextSendAtRef.current;
+
+                    if (!canSendNow) {
+                        return;
+                    }
+
+                    nextSendAtRef.current = performance.now() + sendEveryMsRef.current;
+
+                    const pcmData = new Int16Array(inputData.length);
+                    for (let i = 0; i < inputData.length; i++) {
+                        pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
+                    }
+
+                    ws.send(pcmData.buffer);
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+                const wsUrl = `ws://127.0.0.1:8000/ws/voice/stream/`;
+                const ws = new WebSocket(wsUrl);
+                ws.binaryType = "arraybuffer";
+
+                ws.onopen = () => {
+                    console.log("Connected to WebSocket");
+                    sessionReadyRef.current = true;  // Allow audio transmission immediately
+                    setIsConnected(true);
+                    setIsConnecting(false);
+                };
+
+                ws.onmessage = (event) => {
+                    if (typeof event.data === "string") {
+                        try {
+                            const payload = JSON.parse(event.data) as {
+                                type?: string;
+                                event?: string;
+                                status?: string;
+                            };
+                            const marker = payload.type || payload.event || payload.status;
+                            if (marker === "session_ready") {
+                                sessionReadyRef.current = true;
+                                return;
+                            }
+                        } catch {
+                            if (event.data.toLowerCase().includes("session_ready")) {
+                                sessionReadyRef.current = true;
+                                return;
+                            }
+                        }
+                    }
+
+                    if (event.data instanceof ArrayBuffer) {
+                        const chunk = (event.data as ArrayBuffer).slice(0);
+                        audioQueueRef.current = audioQueueRef.current
+                            .then(() => scheduleAudioChunk(chunk))
+                            .catch(() => { /* error already logged inside scheduleAudioChunk */ });
+                        return;
+                    }
+
+                    if (event.data instanceof Blob) {
+                        audioQueueRef.current = audioQueueRef.current
+                            .then(() => (event.data as Blob).arrayBuffer())
+                            .then((chunk) => scheduleAudioChunk(chunk))
+                            .catch(() => { /* error already logged inside scheduleAudioChunk */ });
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error("WebSocket Error:", error);
+                    setIsConnecting(false);
+                };
+
+                ws.onclose = () => {
+                    console.log("Disconnected from WebSocket");
+                    sessionReadyRef.current = false;
+                    nextPlayTimeRef.current = 0;
+                    activePlaybackCountRef.current = 0;
+                    setIsConnected(false);
+                };
+
+                wsRef.current = ws;
             } catch (error) {
                 console.error("Failed to start session:", error);
-                setIsConnecting(false);
+                await cleanupConnection();
             }
         }
-    }, [status, startSession, endSession]);
-
-    const isConnected = status === "connected";
+    }, [cleanupConnection, isConnected, scheduleAudioChunk]);
 
     return (
         <div className="glass w-full max-w-md rounded-3xl p-8 transition-all duration-500 hover:shadow-2xl">
@@ -112,7 +333,7 @@ export default function AgentCard() {
 
                 <div className="flex items-center justify-center gap-2 text-xs font-medium text-sage-400">
                     <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-sage-500' : 'bg-slate-300'}`}></div>
-                    {status.toUpperCase()}
+                    {isConnected ? "CONNECTED" : "DISCONNECTED"}
                 </div>
             </div>
         </div>
